@@ -58,5 +58,5 @@
     "WIFI_DNS": ""
   },
   "language": "en-GB",
-  "customParams": "#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n#undef DS18X20_MAX_SENSORS\n#define DS18X20_MAX_SENSORS 10\n"
+  "customParams": "#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n#undef DS18X20_MAX_SENSORS\n#define DS18X20_MAX_SENSORS 10\n#define USER_TEMPLATE \"{\\\"NAME\\\":\\\"ESP32S3-Geek\\\",\\\"GPIO\\\":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],\\\"FLAG\\\":0,\\\"BASE\\\":1}\"\n#define FIRMWARE_VERSION_SUFFIX \"-ESP32S3-Geek-10xDS18x20\"\n"
 }
