@@ -29,6 +29,7 @@ const compileConfig = {
   },
   language: 'en-GB',
   customParams: '#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n',
+  platformio_override: 'board_build.filesystem_size = 320K',
 };
 
 async function main() {

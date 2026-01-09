@@ -1,0 +1,791 @@
+From f53aa8ba51583a058d25c95f212aa7072449bf7d Mon Sep 17 00:00:00 2001
+From: HaraldKiessling <harald.kiessling@gmail.com>
+Date: Fri, 9 Jan 2026 16:38:35 +0000
+Subject: [PATCH] Optimize display updates and reduce log output
+
+- Change lv_clock to label for clock display (fixes format attribute warning)
+- Add RTC nil-check to prevent type_error exceptions
+- Reduce IP/SSID status queries from every second to every 60 seconds
+- Add network_counter to SensorDashboard class
+- Add initial network update after 5 seconds on startup
+- Set Weblog level 2 for cleaner log output
+- Extend DS18X20 sensor support from 8 to 10 sensors
+- Add support for multiple BME280 sensors (BME280, BME280-1/2/3)
+- Update pages.jsonl with label-based clock and 10 DS18x20 labels
+
+Result: 98% reduction in status query log entries while maintaining full functionality
+
+Co-authored-by: Ona <no-reply@ona.com>
+---
+ OPTIMIERUNG.md        |  89 ++++++++++++
+ autoexec.be           | 307 ++++++++++++++++++++++++++++++++++++++++++
+ autoexec_optimized.be | 307 ++++++++++++++++++++++++++++++++++++++++++
+ compile_request.json  |   2 +-
+ pages.jsonl           |  20 +++
+ 5 files changed, 724 insertions(+), 1 deletion(-)
+ create mode 100644 OPTIMIERUNG.md
+ create mode 100644 autoexec.be
+ create mode 100644 autoexec_optimized.be
+ create mode 100644 pages.jsonl
+
+diff --git a/OPTIMIERUNG.md b/OPTIMIERUNG.md
+new file mode 100644
+index 0000000..46f9302
+--- /dev/null
++++ b/OPTIMIERUNG.md
+@@ -0,0 +1,89 @@
++# Log-Optimierung für Tasmota-77
++
++## Problem
++Das Log ist sehr voll wegen häufiger Status-Abfragen (jede Sekunde).
++
++## Lösung
++
++### 1. Weblog Level reduziert
++```
++Weblog 2
++```
++✅ Bereits durchgeführt - zeigt nur noch wichtige Meldungen
++
++### 2. Status-Abfragen optimiert
++
++**Vorher:**
++- IP-Adresse: Abfrage jede Sekunde (3600x pro Stunde)
++- SSID: Abfrage jede Sekunde (3600x pro Stunde)
++- Uhrzeit: Abfrage jede Sekunde (notwendig für Sekunden-Anzeige)
++
++**Nachher:**
++- IP-Adresse: Abfrage alle 60 Sekunden (60x pro Stunde) ✅
++- SSID: Abfrage alle 60 Sekunden (60x pro Stunde) ✅
++- Uhrzeit: Abfrage jede Sekunde (notwendig)
++- Initiale Abfrage: Nach 5 Sekunden beim Start
++
++**Reduzierung:** 98% weniger Status-Abfragen für IP/SSID
++
++## Änderungen in autoexec.be
++
++### Neu: Counter für Netzwerk-Abfragen
++```berry
++class SensorDashboard : Driver
++    var network_counter
++    
++    def init()
++        self.network_counter = 0
++    end
++```
++
++### Optimierte every_second()
++```berry
++def every_second()
++    # IP/SSID nur alle 60 Sekunden
++    self.network_counter += 1
++    if self.network_counter >= 60
++        self.network_counter = 0
++        # Status 5 und Status 11 Abfragen
++    end
++    
++    # Uhrzeit jede Sekunde
++    # Sensoren jede Sekunde
++end
++```
++
++### Initiale Abfrage beim Start
++```berry
++def update_network()
++    # Einmalige Abfrage von IP und SSID
++end
++
++# Nach 5 Sekunden ausführen
++tasmota.set_timer(5000, /-> global.dashboard.update_network())
++```
++
++## Upload
++
++Datei: `autoexec_optimized.be` (9990 Bytes)
++
++1. Öffnen Sie https://tasmota-77.samharald.eu
++2. Consoles → Manage File system
++3. Löschen Sie alte `autoexec.be`
++4. Laden Sie `autoexec_optimized.be` als `autoexec.be` hoch
++5. Restart
++
++## Erwartetes Ergebnis
++
++**Log-Output:**
++- 98% weniger Status-Abfragen
++- Nur noch wichtige Meldungen (Weblog 2)
++- Übersichtliches Log
++
++**Display:**
++- Funktioniert wie bisher
++- IP/SSID werden initial und alle 60 Sekunden aktualisiert
++- Uhrzeit läuft weiterhin jede Sekunde
++- Sensoren werden weiterhin jede Sekunde aktualisiert
++
++**Hinweis:** IP und SSID ändern sich normalerweise nicht, daher ist eine Abfrage alle 60 Sekunden ausreichend.
+diff --git a/autoexec.be b/autoexec.be
+new file mode 100644
+index 0000000..5111331
+--- /dev/null
++++ b/autoexec.be
+@@ -0,0 +1,307 @@
++import haspmota
++import json
++import string
++
++# Startet die HASPmota Engine
++haspmota.start()
++
++# Parsing Helfer für Netzwerk-Informationen
++def parse_value(raw_text, key)
++    var s = string.format("%s", raw_text)
++    var key_idx = string.find(s, key)
++    if key_idx == -1 return "Wait..." end
++    
++    var col_idx = string.find(s, ":", key_idx)
++    if col_idx == -1 return "?" end
++    
++    var start_quote = -1
++    var quote_char = ""
++    var i = col_idx + 1
++    var max = size(s)
++    
++    while i < max
++        var c = s[i]
++        if c == '"' || c == "'"
++            start_quote = i
++            quote_char = c
++            break
++        end
++        i += 1
++    end
++    
++    if start_quote == -1 return "?" end
++    var end_quote = string.find(s, quote_char, start_quote + 1)
++    if end_quote == -1 return "?" end
++    
++    var result = ""
++    for j : start_quote + 1 .. end_quote - 1
++        result += s[j]
++    end
++    return result
++end
++
++# Definiert die Treiber-Klasse für zyklische Updates
++class SensorDashboard : Driver
++    var network_counter
++    
++    def init()
++        self.network_counter = 0
++    end
++    
++    def every_second()
++        # Liest alle Sensordaten als JSON-String und parsed sie
++        var raw_json = tasmota.read_sensors()
++        if raw_json == nil return end
++        
++        var m = json.load(raw_json)
++        if m == nil return end
++        
++        # --- Header: IP-Adresse und SSID (nur alle 60 Sekunden) ---
++        self.network_counter += 1
++        if self.network_counter >= 60
++            self.network_counter = 0
++            
++            if global.p1b12 != nil
++                var raw_ip = tasmota.cmd("Status 5")
++                var ip = parse_value(raw_ip, "IPAddress")
++                global.p1b12.text = ip
++            end
++            
++            if global.p1b13 != nil
++                var raw_wifi = tasmota.cmd("Status 11")
++                var ssid = parse_value(raw_wifi, "SSId")
++                global.p1b13.text = ssid
++            end
++        end
++        
++        # --- Header: Uhrzeit (jede Sekunde) ---
++        if global.p1b14 != nil
++            var rtc = tasmota.rtc()
++            if rtc != nil && rtc.contains('local')
++                global.p1b14.text = tasmota.strftime("%H:%M:%S", rtc['local'])
++            end
++        end
++        
++        # --- BME280 Sensoren (p1b30-p1b32) ---
++        var bme_count = 0
++        var bme_labels = [global.p1b30, global.p1b31, global.p1b32]
++        
++        # BME280 (ohne Suffix)
++        if m.contains('BME280') && bme_count < 3
++            var sensor = m['BME280']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-1
++        if m.contains('BME280-1') && bme_count < 3
++            var sensor = m['BME280-1']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-1 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-2
++        if m.contains('BME280-2') && bme_count < 3
++            var sensor = m['BME280-2']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-2 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-3
++        if m.contains('BME280-3') && bme_count < 3
++            var sensor = m['BME280-3']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-3 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # Leere restliche BME Labels
++        while bme_count < 3
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = ""
++            end
++            bme_count += 1
++        end
++        
++        # --- DS18x20 Sensoren (p1b20-p1b29) ---
++        var ds_labels = [
++            global.p1b20, global.p1b21,
++            global.p1b22, global.p1b23,
++            global.p1b24, global.p1b25,
++            global.p1b26, global.p1b27,
++            global.p1b28, global.p1b29
++        ]
++        
++        var ds_count = 0
++        
++        # DS18B20-1
++        if m.contains('DS18B20-1') && ds_count < 10
++            var sensor = m['DS18B20-1']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-2
++        if m.contains('DS18B20-2') && ds_count < 10
++            var sensor = m['DS18B20-2']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-3
++        if m.contains('DS18B20-3') && ds_count < 10
++            var sensor = m['DS18B20-3']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-4
++        if m.contains('DS18B20-4') && ds_count < 10
++            var sensor = m['DS18B20-4']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-5
++        if m.contains('DS18B20-5') && ds_count < 10
++            var sensor = m['DS18B20-5']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-6
++        if m.contains('DS18B20-6') && ds_count < 10
++            var sensor = m['DS18B20-6']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-7
++        if m.contains('DS18B20-7') && ds_count < 10
++            var sensor = m['DS18B20-7']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-8
++        if m.contains('DS18B20-8') && ds_count < 10
++            var sensor = m['DS18B20-8']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-9
++        if m.contains('DS18B20-9') && ds_count < 10
++            var sensor = m['DS18B20-9']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-10
++        if m.contains('DS18B20-10') && ds_count < 10
++            var sensor = m['DS18B20-10']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # Leere restliche DS Labels
++        while ds_count < 10
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = ""
++            end
++            ds_count += 1
++        end
++    end
++    
++    # Initiale Netzwerk-Abfrage beim Start
++    def update_network()
++        if global.p1b12 != nil
++            var raw_ip = tasmota.cmd("Status 5")
++            var ip = parse_value(raw_ip, "IPAddress")
++            global.p1b12.text = ip
++        end
++        
++        if global.p1b13 != nil
++            var raw_wifi = tasmota.cmd("Status 11")
++            var ssid = parse_value(raw_wifi, "SSId")
++            global.p1b13.text = ssid
++        end
++    end
++end
++
++# Globale Instanz des Dashboards
++global.dashboard = SensorDashboard()
++
++# Registriere den Driver
++tasmota.add_driver(global.dashboard)
++
++# Zusätzlich: Cron-Job als Backup (läuft jede Sekunde)
++tasmota.add_cron("*/1 * * * * *", /-> global.dashboard.every_second(), "sensor_update")
++
++# Initiale Netzwerk-Abfrage nach 5 Sekunden (damit WLAN verbunden ist)
++tasmota.set_timer(5000, /-> global.dashboard.update_network())
+diff --git a/autoexec_optimized.be b/autoexec_optimized.be
+new file mode 100644
+index 0000000..5111331
+--- /dev/null
++++ b/autoexec_optimized.be
+@@ -0,0 +1,307 @@
++import haspmota
++import json
++import string
++
++# Startet die HASPmota Engine
++haspmota.start()
++
++# Parsing Helfer für Netzwerk-Informationen
++def parse_value(raw_text, key)
++    var s = string.format("%s", raw_text)
++    var key_idx = string.find(s, key)
++    if key_idx == -1 return "Wait..." end
++    
++    var col_idx = string.find(s, ":", key_idx)
++    if col_idx == -1 return "?" end
++    
++    var start_quote = -1
++    var quote_char = ""
++    var i = col_idx + 1
++    var max = size(s)
++    
++    while i < max
++        var c = s[i]
++        if c == '"' || c == "'"
++            start_quote = i
++            quote_char = c
++            break
++        end
++        i += 1
++    end
++    
++    if start_quote == -1 return "?" end
++    var end_quote = string.find(s, quote_char, start_quote + 1)
++    if end_quote == -1 return "?" end
++    
++    var result = ""
++    for j : start_quote + 1 .. end_quote - 1
++        result += s[j]
++    end
++    return result
++end
++
++# Definiert die Treiber-Klasse für zyklische Updates
++class SensorDashboard : Driver
++    var network_counter
++    
++    def init()
++        self.network_counter = 0
++    end
++    
++    def every_second()
++        # Liest alle Sensordaten als JSON-String und parsed sie
++        var raw_json = tasmota.read_sensors()
++        if raw_json == nil return end
++        
++        var m = json.load(raw_json)
++        if m == nil return end
++        
++        # --- Header: IP-Adresse und SSID (nur alle 60 Sekunden) ---
++        self.network_counter += 1
++        if self.network_counter >= 60
++            self.network_counter = 0
++            
++            if global.p1b12 != nil
++                var raw_ip = tasmota.cmd("Status 5")
++                var ip = parse_value(raw_ip, "IPAddress")
++                global.p1b12.text = ip
++            end
++            
++            if global.p1b13 != nil
++                var raw_wifi = tasmota.cmd("Status 11")
++                var ssid = parse_value(raw_wifi, "SSId")
++                global.p1b13.text = ssid
++            end
++        end
++        
++        # --- Header: Uhrzeit (jede Sekunde) ---
++        if global.p1b14 != nil
++            var rtc = tasmota.rtc()
++            if rtc != nil && rtc.contains('local')
++                global.p1b14.text = tasmota.strftime("%H:%M:%S", rtc['local'])
++            end
++        end
++        
++        # --- BME280 Sensoren (p1b30-p1b32) ---
++        var bme_count = 0
++        var bme_labels = [global.p1b30, global.p1b31, global.p1b32]
++        
++        # BME280 (ohne Suffix)
++        if m.contains('BME280') && bme_count < 3
++            var sensor = m['BME280']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-1
++        if m.contains('BME280-1') && bme_count < 3
++            var sensor = m['BME280-1']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-1 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-2
++        if m.contains('BME280-2') && bme_count < 3
++            var sensor = m['BME280-2']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-2 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # BME280-3
++        if m.contains('BME280-3') && bme_count < 3
++            var sensor = m['BME280-3']
++            var temp = sensor.find('Temperature', 0.0)
++            var hum = sensor.find('Humidity', 0.0)
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = string.format("BME280-3 %.1f°C %.0f%%", temp, hum)
++                bme_count += 1
++            end
++        end
++        
++        # Leere restliche BME Labels
++        while bme_count < 3
++            if bme_labels[bme_count] != nil
++                bme_labels[bme_count].text = ""
++            end
++            bme_count += 1
++        end
++        
++        # --- DS18x20 Sensoren (p1b20-p1b29) ---
++        var ds_labels = [
++            global.p1b20, global.p1b21,
++            global.p1b22, global.p1b23,
++            global.p1b24, global.p1b25,
++            global.p1b26, global.p1b27,
++            global.p1b28, global.p1b29
++        ]
++        
++        var ds_count = 0
++        
++        # DS18B20-1
++        if m.contains('DS18B20-1') && ds_count < 10
++            var sensor = m['DS18B20-1']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-2
++        if m.contains('DS18B20-2') && ds_count < 10
++            var sensor = m['DS18B20-2']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-3
++        if m.contains('DS18B20-3') && ds_count < 10
++            var sensor = m['DS18B20-3']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-4
++        if m.contains('DS18B20-4') && ds_count < 10
++            var sensor = m['DS18B20-4']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-5
++        if m.contains('DS18B20-5') && ds_count < 10
++            var sensor = m['DS18B20-5']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-6
++        if m.contains('DS18B20-6') && ds_count < 10
++            var sensor = m['DS18B20-6']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-7
++        if m.contains('DS18B20-7') && ds_count < 10
++            var sensor = m['DS18B20-7']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-8
++        if m.contains('DS18B20-8') && ds_count < 10
++            var sensor = m['DS18B20-8']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-9
++        if m.contains('DS18B20-9') && ds_count < 10
++            var sensor = m['DS18B20-9']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # DS18B20-10
++        if m.contains('DS18B20-10') && ds_count < 10
++            var sensor = m['DS18B20-10']
++            var id = sensor['Id']
++            var temp = sensor['Temperature']
++            var short_id = id[8..11]
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = string.format("..%s %.1f°C", short_id, temp)
++            end
++            ds_count += 1
++        end
++        
++        # Leere restliche DS Labels
++        while ds_count < 10
++            if ds_labels[ds_count] != nil
++                ds_labels[ds_count].text = ""
++            end
++            ds_count += 1
++        end
++    end
++    
++    # Initiale Netzwerk-Abfrage beim Start
++    def update_network()
++        if global.p1b12 != nil
++            var raw_ip = tasmota.cmd("Status 5")
++            var ip = parse_value(raw_ip, "IPAddress")
++            global.p1b12.text = ip
++        end
++        
++        if global.p1b13 != nil
++            var raw_wifi = tasmota.cmd("Status 11")
++            var ssid = parse_value(raw_wifi, "SSId")
++            global.p1b13.text = ssid
++        end
++    end
++end
++
++# Globale Instanz des Dashboards
++global.dashboard = SensorDashboard()
++
++# Registriere den Driver
++tasmota.add_driver(global.dashboard)
++
++# Zusätzlich: Cron-Job als Backup (läuft jede Sekunde)
++tasmota.add_cron("*/1 * * * * *", /-> global.dashboard.every_second(), "sensor_update")
++
++# Initiale Netzwerk-Abfrage nach 5 Sekunden (damit WLAN verbunden ist)
++tasmota.set_timer(5000, /-> global.dashboard.update_network())
+diff --git a/compile_request.json b/compile_request.json
+index 78f7439..bfd10f6 100644
+--- a/compile_request.json
++++ b/compile_request.json
+@@ -58,5 +58,5 @@
+     "WIFI_DNS": ""
+   },
+   "language": "en-GB",
+-  "customParams": "#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n"
++  "customParams": "#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n#undef DS18X20_MAX_SENSORS\n#define DS18X20_MAX_SENSORS 10\n"
+ }
+diff --git a/pages.jsonl b/pages.jsonl
+new file mode 100644
+index 0000000..9eca20d
+--- /dev/null
++++ b/pages.jsonl
+@@ -0,0 +1,20 @@
++{"page":1}
++{"id":0,"bg_color":"#0000A0","bg_grad_color":"#000000","bg_grad_dir":1}
++{"id":10,"obj":"obj","x":0,"y":0,"w":240,"h":26,"bg_color":"#D00000","bg_opa":255,"radius":0,"border_width":0}
++{"id":12,"obj":"label","x":3,"y":4,"w":85,"h":18,"text":"192.168.0.77","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":13,"obj":"label","x":92,"y":4,"w":60,"h":18,"text":"miVida2","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":14,"obj":"label","x":155,"y":4,"w":65,"h":18,"text":"00:00:00","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":15,"obj":"lv_wifi_arcs","x":215,"y":0,"w":25,"h":26,"bg_color":"#D00000","line_color":"#FFFFFF"}
++{"id":30,"obj":"label","x":5,"y":29,"w":230,"h":14,"text":"","text_color":"#FFFF00","text_font":"montserrat-14","align":0}
++{"id":31,"obj":"label","x":5,"y":44,"w":230,"h":14,"text":"","text_color":"#FFFF00","text_font":"montserrat-14","align":0}
++{"id":32,"obj":"label","x":5,"y":59,"w":230,"h":14,"text":"","text_color":"#FFFF00","text_font":"montserrat-14","align":0}
++{"id":20,"obj":"label","x":5,"y":76,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":21,"obj":"label","x":125,"y":76,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":22,"obj":"label","x":5,"y":91,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":23,"obj":"label","x":125,"y":91,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":24,"obj":"label","x":5,"y":106,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":25,"obj":"label","x":125,"y":106,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":26,"obj":"label","x":5,"y":121,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":27,"obj":"label","x":125,"y":121,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":28,"obj":"label","x":5,"y":136,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
++{"id":29,"obj":"label","x":125,"y":136,"w":110,"h":14,"text":"","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
+-- 
+2.51.0
+

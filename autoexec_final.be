@@ -67,7 +67,10 @@ class SensorDashboard : Driver
         
         # --- Header: Uhrzeit (p1b14) ---
         if global.p1b14 != nil
-            global.p1b14.text = tasmota.strftime("%H:%M:%S", tasmota.rtc())
+            var rtc = tasmota.rtc()
+            if rtc != nil && rtc.contains('local')
+                global.p1b14.text = tasmota.strftime("%H:%M:%S", rtc['local'])
+            end
         end
         
         # --- BME280 Sensoren (p1b30-p1b32) ---

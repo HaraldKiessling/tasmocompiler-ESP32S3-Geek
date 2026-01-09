@@ -3,7 +3,7 @@
 
 {"comment":"--- Header: Roter Hintergrund ---"}
 {"id":10,"obj":"obj","x":0,"y":0,"w":240,"h":26,"bg_color":"#D00000","bg_opa":255,"radius":0,"border_width":0}
-{"id":12,"obj":"label","x":3,"y":4,"w":85,"h":18,"text":"192.168.0.77","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
+{"id":12,"obj":"label","x":3,"y":4,"w":85,"h":18,"text":"...0.77","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
 {"id":13,"obj":"label","x":92,"y":4,"w":60,"h":18,"text":"miVida2","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
 {"id":14,"obj":"label","x":155,"y":4,"w":65,"h":18,"text":"00:00:00","text_color":"#FFFFFF","text_font":"montserrat-14","align":0}
 {"id":15,"obj":"lv_wifi_arcs","x":215,"y":0,"w":25,"h":26,"bg_color":"#D00000","line_color":"#FFFFFF"}
