@@ -51,23 +51,23 @@ class SensorDashboard : Driver
         var m = json.load(raw_json)
         if m == nil return end
         
-        # --- Header: IP-Adresse (p0b12) ---
-        if global.p0b12 != nil
+        # --- Header: IP-Adresse (p1b12) ---
+        if global.p1b12 != nil
             var raw_ip = tasmota.cmd("Status 5")
             var ip = parse_value(raw_ip, "IPAddress")
-            global.p0b12.text = ip
+            global.p1b12.text = ip
         end
         
-        # --- Header: SSID (p0b13) ---
-        if global.p0b13 != nil
+        # --- Header: SSID (p1b13) ---
+        if global.p1b13 != nil
             var raw_wifi = tasmota.cmd("Status 11")
             var ssid = parse_value(raw_wifi, "SSId")
-            global.p0b13.text = ssid
+            global.p1b13.text = ssid
         end
         
-        # --- BME280 Sensoren (p0b30-p0b32) ---
+        # --- BME280 Sensoren (p1b30-p1b32) ---
         var bme_count = 0
-        var bme_labels = [global.p0b30, global.p0b31, global.p0b32]
+        var bme_labels = [global.p1b30, global.p1b31, global.p1b32]
         
         # Prüfe BME280
         if m.contains('BME280')
@@ -88,12 +88,12 @@ class SensorDashboard : Driver
             bme_count += 1
         end
         
-        # --- DS18x20 Sensoren (p0b20-p0b27) ---
+        # --- DS18x20 Sensoren (p1b20-p1b27) ---
         var ds_labels = [
-            global.p0b20, global.p0b21,
-            global.p0b22, global.p0b23,
-            global.p0b24, global.p0b25,
-            global.p0b26, global.p0b27
+            global.p1b20, global.p1b21,
+            global.p1b22, global.p1b23,
+            global.p1b24, global.p1b25,
+            global.p1b26, global.p1b27
         ]
         
         var ds_count = 0
