@@ -57,20 +57,19 @@ class SensorDashboard : Driver
             end
         end
         
-        # --- BME280 Sensoren (p1b30-p1b32) ---
+        # --- BME280 Sensoren zweispaltig (p1b30-p1b31) nur Temperatur ---
         var bme_count = 0
-        var bme_labels = [global.p1b30, global.p1b31, global.p1b32]
+        var bme_labels = [global.p1b30, global.p1b31]
         
         # Durchsuche alle Keys nach BME280-*
         for key: m.keys()
-            if bme_count >= 3 break end
+            if bme_count >= 2 break end
             if string.find(key, 'BME280') == 0
                 var sensor = m[key]
-                if sensor.contains('Temperature') && sensor.contains('Humidity')
+                if sensor.contains('Temperature')
                     var temp = sensor['Temperature']
-                    var hum = sensor['Humidity']
                     if bme_labels[bme_count] != nil
-                        bme_labels[bme_count].text = string.format("%s %.1f°C %.0f%%", key, temp, hum)
+                        bme_labels[bme_count].text = string.format("%s %.1f°C", key, temp)
                         bme_count += 1
                     end
                 end
@@ -78,7 +77,7 @@ class SensorDashboard : Driver
         end
         
         # Leere restliche BME Labels
-        while bme_count < 3
+        while bme_count < 2
             if bme_labels[bme_count] != nil
                 bme_labels[bme_count].text = ""
             end
