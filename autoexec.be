@@ -86,47 +86,19 @@ class SensorDashboard : Driver
         var bme_count = 0
         var bme_labels = [global.p1b30, global.p1b31, global.p1b32]
         
-        # BME280 (ohne Suffix)
-        if m.contains('BME280') && bme_count < 3
-            var sensor = m['BME280']
-            var temp = sensor.find('Temperature', 0.0)
-            var hum = sensor.find('Humidity', 0.0)
-            if bme_labels[bme_count] != nil
-                bme_labels[bme_count].text = string.format("BME280 %.1f°C %.0f%%", temp, hum)
-                bme_count += 1
-            end
-        end
-        
-        # BME280-1
-        if m.contains('BME280-1') && bme_count < 3
-            var sensor = m['BME280-1']
-            var temp = sensor.find('Temperature', 0.0)
-            var hum = sensor.find('Humidity', 0.0)
-            if bme_labels[bme_count] != nil
-                bme_labels[bme_count].text = string.format("BME280-1 %.1f°C %.0f%%", temp, hum)
-                bme_count += 1
-            end
-        end
-        
-        # BME280-2
-        if m.contains('BME280-2') && bme_count < 3
-            var sensor = m['BME280-2']
-            var temp = sensor.find('Temperature', 0.0)
-            var hum = sensor.find('Humidity', 0.0)
-            if bme_labels[bme_count] != nil
-                bme_labels[bme_count].text = string.format("BME280-2 %.1f°C %.0f%%", temp, hum)
-                bme_count += 1
-            end
-        end
-        
-        # BME280-3
-        if m.contains('BME280-3') && bme_count < 3
-            var sensor = m['BME280-3']
-            var temp = sensor.find('Temperature', 0.0)
-            var hum = sensor.find('Humidity', 0.0)
-            if bme_labels[bme_count] != nil
-                bme_labels[bme_count].text = string.format("BME280-3 %.1f°C %.0f%%", temp, hum)
-                bme_count += 1
+        # Durchsuche alle Keys nach BME280-*
+        for key: m.keys()
+            if bme_count >= 3 break end
+            if string.find(key, 'BME280') == 0
+                var sensor = m[key]
+                if sensor.contains('Temperature') && sensor.contains('Humidity')
+                    var temp = sensor['Temperature']
+                    var hum = sensor['Humidity']
+                    if bme_labels[bme_count] != nil
+                        bme_labels[bme_count].text = string.format("%s %.1f°C %.0f%%", key, temp, hum)
+                        bme_count += 1
+                    end
+                end
             end
         end
         
@@ -303,5 +275,5 @@ tasmota.add_driver(global.dashboard)
 # Zusätzlich: Cron-Job als Backup (läuft jede Sekunde)
 tasmota.add_cron("*/1 * * * * *", /-> global.dashboard.every_second(), "sensor_update")
 
-# Initiale Netzwerk-Abfrage nach 5 Sekunden (damit WLAN verbunden ist)
-tasmota.set_timer(5000, /-> global.dashboard.update_network())
+# Initiale Netzwerk-Abfrage nach 10 Sekunden (damit WLAN verbunden ist)
+tasmota.set_timer(10000, /-> global.dashboard.update_network())
