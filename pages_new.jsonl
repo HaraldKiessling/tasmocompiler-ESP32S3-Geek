@@ -1,0 +1,24 @@
+{"page":0,"comment":"---------- Global Header ----------"}
+{"id":11,"obj":"label","x":0,"y":0,"w":240,"h":22,"bg_color":"#D00000","bg_opa":255,"radius":0,"text":"Sensor Monitor","text_color":"#FFFFFF","text_font":"montserrat-14","align":1}
+{"id":12,"obj":"label","x":5,"y":3,"w":80,"h":16,"text":"192.168.0.77","text_color":"#FFFFFF","text_font":"montserrat-10","align":0}
+{"id":13,"obj":"label","x":90,"y":3,"w":60,"h":16,"text":"miVida2","text_color":"#FFFFFF","text_font":"montserrat-10","align":0}
+{"id":14,"obj":"lv_clock","x":155,"y":3,"w":50,"h":16,"text_color":"#FFFFFF"}
+{"id":15,"obj":"lv_wifi_arcs","x":210,"y":0,"w":25,"h":22,"bg_color":"#D00000","line_color":"#FFFFFF"}
+
+{"page":1,"comment":"---------- Sensor Page ----------"}
+{"id":0,"bg_color":"#0000A0","bg_grad_color":"#000000","bg_grad_dir":1,"text_color":"#FFFFFF"}
+
+{"comment":"--- BME280 Sensoren (IDs 30-32) ---"}
+{"id":30,"obj":"label","x":5,"y":25,"w":230,"h":16,"text":"","text_color":"#FFFF00","text_font":"montserrat-12","align":0}
+{"id":31,"obj":"label","x":5,"y":42,"w":230,"h":16,"text":"","text_color":"#FFFF00","text_font":"montserrat-12","align":0}
+{"id":32,"obj":"label","x":5,"y":59,"w":230,"h":16,"text":"","text_color":"#FFFF00","text_font":"montserrat-12","align":0}
+
+{"comment":"--- DS18x20 Sensoren zweispaltig (IDs 20-29) ---"}
+{"id":20,"obj":"label","x":5,"y":80,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":21,"obj":"label","x":125,"y":80,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":22,"obj":"label","x":5,"y":97,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":23,"obj":"label","x":125,"y":97,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":24,"obj":"label","x":5,"y":114,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":25,"obj":"label","x":125,"y":114,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":26,"obj":"label","x":5,"y":131,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
+{"id":27,"obj":"label","x":125,"y":131,"w":110,"h":16,"text":"","text_color":"#FFFFFF","text_font":"montserrat-12","align":0}
