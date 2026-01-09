@@ -69,7 +69,9 @@ class SensorDashboard : Driver
                 if sensor.contains('Temperature')
                     var temp = sensor['Temperature']
                     if bme_labels[bme_count] != nil
-                        bme_labels[bme_count].text = string.format("%s %.1f°C", key, temp)
+                        # Extrahiere nur die letzten 2 Zeichen (I2C-Adresse: 76 oder 77)
+                        var addr = key[size(key)-2..]
+                        bme_labels[bme_count].text = string.format("%s %.1f°C", addr, temp)
                         bme_count += 1
                     end
                 end
