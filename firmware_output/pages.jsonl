@@ -1,0 +1,10 @@
+{"page":1,"comment":"--- Startseite: Übersicht ---"}
+{"id":1,"obj":"label","x":0,"y":0,"w":240,"h":25,"text":"Umwelt-Monitor","bg_color":"#1C1C1C","text_color":"#FFFFFF","align":1}
+{"id":2,"obj":"label","x":5,"y":30,"w":230,"h":20,"text":"WiFi: Verbinde...","text_font":"montserrat-14","text_color":"#AAAAAA"}
+{"id":10,"obj":"label","x":5,"y":55,"w":230,"h":40,"text":"BME280:\nLade Daten...","text_font":"montserrat-14"}
+{"id":11,"obj":"btn","x":140,"y":100,"w":95,"h":30,"text":"Details >","text_font":"montserrat-14","click":0,"action":"p2","bg_color":"#0055AA"}
+
+{"page":2,"comment":"--- Seite 2: Sensor Liste ---"}
+{"id":1,"obj":"label","x":0,"y":0,"w":240,"h":25,"text":"Sensor IDs (End-No)","bg_color":"#8B0000","text_color":"#FFFFFF","align":1}
+{"id":20,"obj":"label","x":5,"y":30,"w":230,"h":65,"text":"Warte auf Sensoren...","text_font":"montserrat-14","align":0,"long_mode":0}
+{"id":21,"obj":"btn","x":5,"y":100,"w":95,"h":30,"text":"< Zurück","text_font":"montserrat-14","click":0,"action":"p1","bg_color":"#444444"}

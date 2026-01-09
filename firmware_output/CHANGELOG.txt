@@ -1,0 +1,92 @@
+═══════════════════════════════════════════════════════════════
+  TASMOTA ESP32 S3 LVGL FIRMWARE v15.0.1 - ERWEITERTE VERSION
+═══════════════════════════════════════════════════════════════
+
+Build-Datum: 2026-01-09 11:00 UTC
+
+NEUE FEATURES IN DIESER VERSION:
+---------------------------------
+
+✅ DS18X20 Sensor-Limit erhöht
+   - Standard: 8 Sensoren
+   - NEU: 10 Sensoren
+   - Unterstützt mehr DS18B20/DS18S20/DS1822 Temperatursensoren
+
+✅ Roboto Font-Familie hinzugefügt
+   - Roboto-Regular.ttf (342 KB)
+   - Roboto-Bold.ttf (343 KB)
+   - Roboto-Light.ttf (342 KB)
+   - Fonts müssen nach dem Flash manuell hochgeladen werden
+   - Siehe README_FONTS.md für Anleitung
+
+VORHANDENE FEATURES:
+--------------------
+
+✅ LVGL Display Support
+✅ Touch Controller (XPT2046, FT5206, GT911, CST816S)
+✅ Berry Scripting
+✅ File System (LittleFS)
+✅ Rules Engine
+✅ I2C & SPI Support
+✅ RTC Support (BM8563)
+✅ Energy Sensor
+✅ Serial Bridge
+✅ Enhanced WiFi Scan
+✅ Rotary Encoder
+✅ Buzzer
+✅ Light Palette
+✅ Shelly Pro Support
+
+WIFI-KONFIGURATION:
+-------------------
+SSID:     miVida2
+Passwort: m1Curaz#n
+
+WICHTIGE HINWEISE:
+------------------
+
+1. DS18X20 SENSOREN:
+   - Bis zu 10 Sensoren werden unterstützt
+   - Verwenden Sie GPIO für OneWire Bus
+   - Konfiguration über Tasmota Console:
+     GPIO<x> DS18x20
+
+2. ROBOTO FONTS:
+   - Fonts sind NICHT im Firmware-Image enthalten
+   - Müssen nach dem Flash hochgeladen werden
+   - Anleitung in README_FONTS.md
+   - Verwendung in Berry Scripts möglich
+
+3. FILESYSTEM:
+   - 320 KB LittleFS Partition
+   - Fonts belegen ca. 1 MB (alle drei)
+   - Empfehlung: Nur benötigte Fonts hochladen
+
+CHECKSUMMEN (MD5):
+------------------
+1be15f06f2554f7fd1e9c4476e021fe6  tasmota32s3.bin
+e49233e14030efa7df41857a3357cc6b  tasmota32s3.factory.bin
+
+DATEIEN IN DIESEM PAKET:
+-------------------------
+- tasmota32s3.factory.bin (3.0 MB) - Initial Flash
+- tasmota32s3.bin (2.1 MB) - OTA Updates
+- Roboto-Regular.ttf (342 KB) - Font zum Hochladen
+- Roboto-Bold.ttf (343 KB) - Font zum Hochladen
+- Roboto-Light.ttf (342 KB) - Font zum Hochladen
+- README_FONTS.md - Font-Anleitung
+- user_config_override.h - Build-Konfiguration
+- platformio_override.ini - PlatformIO-Konfiguration
+- CHANGELOG.txt - Diese Datei
+
+NÄCHSTE SCHRITTE:
+-----------------
+1. Firmware flashen (siehe DOWNLOAD_ANLEITUNG.md)
+2. Gerät startet und verbindet mit WiFi "miVida2"
+3. IP-Adresse im Router finden
+4. Tasmota Web-Interface öffnen
+5. Fonts hochladen (Consoles → Manage File system)
+6. DS18X20 Sensoren konfigurieren
+7. Display mit LVGL konfigurieren
+
+═══════════════════════════════════════════════════════════════

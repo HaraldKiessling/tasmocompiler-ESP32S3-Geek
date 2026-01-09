@@ -1,0 +1,62 @@
+{
+  "version": {
+    "tasmotaVersion": "v15.0.1"
+  },
+  "board": "esp32s3",
+  "features": {
+    "board": {
+      "name": "esp32s3",
+      "chip_type": "esp32",
+      "description": "ESP32 S3",
+      "default": false,
+      "show": true,
+      "platformio_entries": {
+        "extends": "env:tasmota32_base",
+        "board": "esp32s3-qio_qspi",
+        "build_flags": "${env:tasmota32_base.build_flags}",
+        "lib_extra_dirs": ["${env:tasmota32_base.lib_extra_dirs}"],
+        "lib_ignore": ["${env:tasmota32_base.lib_ignore}", "Micro-RTSP", "epdiy"]
+      },
+      "platformio_env_name": "tasmota32s3",
+      "tooltip": "",
+      "include_features": ["berry", "ufilesys", "rules"],
+      "exclude_features": [],
+      "defines": {}
+    },
+    "lvgl": true,
+    "berry": true,
+    "ufilesys": true,
+    "rules": true,
+    "USE_I2C": true,
+    "USE_SPI": true,
+    "USE_ENERGY_SENSOR": true,
+    "USE_DISPLAY": true,
+    "USE_UNIVERSAL_DISPLAY": true,
+    "USE_UNIVERSAL_TOUCH": true,
+    "USE_LVGL": true,
+    "USE_MPU_ACCEL": true,
+    "USE_RTC_CHIPS": true,
+    "USE_BM8563": true,
+    "USE_XPT2046": true,
+    "USE_FT5206": true,
+    "USE_GT911": true,
+    "USE_CST816S": true,
+    "USE_DISPLAY_LVGL_ONLY": true,
+    "USE_ENHANCED_GUI_WIFI_SCAN": true,
+    "ROTARY_V1": true,
+    "USE_BUZZER": true,
+    "USE_LIGHT_PALETTE": true,
+    "USE_SHELLY_PRO": true,
+    "USE_SERIAL_BRIDGE": true
+  },
+  "network": {
+    "STA_SSID1": "",
+    "STA_PASS1": "",
+    "WIFI_IP_ADDRESS": "",
+    "WIFI_GATEWAY": "",
+    "WIFI_SUBNETMASK": "",
+    "WIFI_DNS": ""
+  },
+  "language": "en-GB",
+  "customParams": "#undef SET_ESP32_STACK_SIZE\n#define SET_ESP32_STACK_SIZE (24 * 1024)\n"
+}
