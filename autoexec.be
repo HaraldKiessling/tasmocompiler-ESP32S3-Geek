@@ -5,40 +5,7 @@ import string
 # Startet die HASPmota Engine
 haspmota.start()
 
-# Parsing Helfer für Netzwerk-Informationen
-def parse_value(raw_text, key)
-    var s = string.format("%s", raw_text)
-    var key_idx = string.find(s, key)
-    if key_idx == -1 return "Wait..." end
-    
-    var col_idx = string.find(s, ":", key_idx)
-    if col_idx == -1 return "?" end
-    
-    var start_quote = -1
-    var quote_char = ""
-    var i = col_idx + 1
-    var max = size(s)
-    
-    while i < max
-        var c = s[i]
-        if c == '"' || c == "'"
-            start_quote = i
-            quote_char = c
-            break
-        end
-        i += 1
-    end
-    
-    if start_quote == -1 return "?" end
-    var end_quote = string.find(s, quote_char, start_quote + 1)
-    if end_quote == -1 return "?" end
-    
-    var result = ""
-    for j : start_quote + 1 .. end_quote - 1
-        result += s[j]
-    end
-    return result
-end
+# Keine parse_value() mehr - verwenden JSON direkt
 
 # Definiert die Treiber-Klasse für zyklische Updates
 class SensorDashboard : Driver
@@ -62,15 +29,23 @@ class SensorDashboard : Driver
             self.network_counter = 0
             
             if global.p1b12 != nil
-                var raw_ip = tasmota.cmd("Status 5")
-                var ip = parse_value(raw_ip, "IPAddress")
-                global.p1b12.text = ip
+                var status5 = tasmota.cmd("Status 5", true)
+                if status5 != nil && status5.contains("StatusNET")
+                    var net = status5["StatusNET"]
+                    if net.contains("IPAddress")
+                        global.p1b12.text = net["IPAddress"]
+                    end
+                end
             end
             
             if global.p1b13 != nil
-                var raw_wifi = tasmota.cmd("Status 11")
-                var ssid = parse_value(raw_wifi, "SSId")
-                global.p1b13.text = ssid
+                var status11 = tasmota.cmd("Status 11", true)
+                if status11 != nil && status11.contains("StatusSTS")
+                    var sts = status11["StatusSTS"]
+                    if sts.contains("Wifi") && sts["Wifi"].contains("SSId")
+                        global.p1b13.text = sts["Wifi"]["SSId"]
+                    end
+                end
             end
         end
         
@@ -253,15 +228,23 @@ class SensorDashboard : Driver
     # Initiale Netzwerk-Abfrage beim Start
     def update_network()
         if global.p1b12 != nil
-            var raw_ip = tasmota.cmd("Status 5")
-            var ip = parse_value(raw_ip, "IPAddress")
-            global.p1b12.text = ip
+            var status5 = tasmota.cmd("Status 5", true)
+            if status5 != nil && status5.contains("StatusNET")
+                var net = status5["StatusNET"]
+                if net.contains("IPAddress")
+                    global.p1b12.text = net["IPAddress"]
+                end
+            end
         end
         
         if global.p1b13 != nil
-            var raw_wifi = tasmota.cmd("Status 11")
-            var ssid = parse_value(raw_wifi, "SSId")
-            global.p1b13.text = ssid
+            var status11 = tasmota.cmd("Status 11", true)
+            if status11 != nil && status11.contains("StatusSTS")
+                var sts = status11["StatusSTS"]
+                if sts.contains("Wifi") && sts["Wifi"].contains("SSId")
+                    global.p1b13.text = sts["Wifi"]["SSId"]
+                end
+            end
         end
     end
 end
