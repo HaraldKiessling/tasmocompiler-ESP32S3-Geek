@@ -13,29 +13,87 @@
 
 ## 🎯 ESP32-S3-Geek Firmware Download
 
-**Pre-compiled firmware for ESP32-S3-Geek with LVGL display and sensors:**
+**Latest Pre-compiled Firmware (v15.0.1 - 2026-01-10):**
 
-### Quick Download
+### 🆕 Enhanced Version with BME280 & LittleFS (Recommended)
+
+**Build Date:** 2026-01-10 13:52 UTC  
+**Size:** 2.7 MB (2,790,256 Bytes)  
+**MD5:** `0ecc46e94126d688305535f095582ef6`
+
+#### Quick Download
 
 ```bash
-# LVGL Version (2.1 MB) - Recommended
+# Direct download via curl
+curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin \
+  "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
+
+# Or via wget
+wget https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
+```
+
+#### OTA Update (Direct from GitHub)
+
+```
+Backlog OtaUrl https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin; Upgrade 1
+```
+
+#### Local Path in Repository
+
+```
+firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
+```
+
+**Features:**
+- ✅ **10x DS18x20** Temperature Sensors (1-Wire)
+- ✅ **BME280** Environmental Sensor (I2C) - Temp, Humidity, Pressure
+- ✅ **ST7789V Display** (240x135) with LVGL v9.3.0
+- ✅ **CST816S Touch** Controller
+- ✅ **LittleFS** Filesystem (320 KB)
+- ✅ **Berry** Scripting Engine
+- ✅ **Matter/Thread** Support
+- ✅ **MQTT** Client
+- ✅ **OTA** Updates
+
+**Tested on:**
+- ✅ Tasmota-75 (2x BME280) - All functions working
+- ✅ Tasmota-77 (3x DS18B20) - Ready for deployment
+
+---
+
+### 📦 Previous Versions
+
+#### LVGL Version (2.1 MB)
+```bash
 curl -L -o tasmota32s3-lvgl.bin \
   "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/tasmota32s3-lvgl-v15.0.1-ESP32S3-Geek-10xDS18x20.bin"
+```
 
-# Matter-HA Version (2.7 MB)
+#### Matter-HA Version (2.7 MB)
+```bash
 curl -L -o tasmota32s3-matter-ha.bin \
   "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/tasmota32s3-v15.0.1-Matter-HA-BME280-fixed.bin"
 ```
 
-**Features:**
-- ✅ LVGL Display with Touch (CST816S)
-- ✅ DS18B20 Temperature Sensors (up to 10)
-- ✅ BME280 Environmental Sensor (I2C)
-- ✅ Berry Scripting (autoexec.be)
-- ✅ File System (pages.jsonl)
-- ✅ WiFi/MQTT
+---
 
-**Documentation:**
+### 📖 Documentation
+
+**📦 [FIRMWARE-INDEX.md](FIRMWARE-INDEX.md) - Complete Firmware Index**
+- All firmware versions and download links
+- Version comparison
+- MD5 checksums
+- Documentation index
+
+**New Documentation (2026-01-10):**
+- 🔗 [QUICK-LINKS.md](QUICK-LINKS.md) - Quick access to all links
+- 📥 [FIRMWARE-DIRECT-DOWNLOAD.md](FIRMWARE-DIRECT-DOWNLOAD.md) - Direct download links & verification
+- 🔄 [FIRMWARE-DOWNLOAD-LINKS.md](FIRMWARE-DOWNLOAD-LINKS.md) - OTA update methods
+- 📘 [WAVESHARE-ESP32-S3-GEEK-GUIDE.md](WAVESHARE-ESP32-S3-GEEK-GUIDE.md) - Complete guide
+- 📊 [DEPLOYMENT-SUMMARY.md](DEPLOYMENT-SUMMARY.md) - Deployment summary
+- 📦 [README-DEPLOYMENT.md](README-DEPLOYMENT.md) - Package overview
+
+**Previous Documentation:**
 - 📥 [FIRMWARE_DOWNLOAD.md](FIRMWARE_DOWNLOAD.md) - Complete download guide
 - 🚀 [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Installation instructions
 - ⚙️ [SETUP_TASMOTA_77.md](SETUP_TASMOTA_77.md) - Configuration guide
