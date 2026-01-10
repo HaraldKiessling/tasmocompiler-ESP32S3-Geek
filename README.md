@@ -9,6 +9,41 @@
   <img src="./docs/logo/tasmocompiler-full.svg" width="40%">
 </div>
 
+---
+
+## 🎯 ESP32-S3-Geek Firmware Download
+
+**Pre-compiled firmware for ESP32-S3-Geek with LVGL display and sensors:**
+
+### Quick Download
+
+```bash
+# LVGL Version (2.1 MB) - Recommended
+curl -L -o tasmota32s3-lvgl.bin \
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/tasmota32s3-lvgl-v15.0.1-ESP32S3-Geek-10xDS18x20.bin"
+
+# Matter-HA Version (2.7 MB)
+curl -L -o tasmota32s3-matter-ha.bin \
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/tasmota32s3-v15.0.1-Matter-HA-BME280-fixed.bin"
+```
+
+**Features:**
+- ✅ LVGL Display with Touch (CST816S)
+- ✅ DS18B20 Temperature Sensors (up to 10)
+- ✅ BME280 Environmental Sensor (I2C)
+- ✅ Berry Scripting (autoexec.be)
+- ✅ File System (pages.jsonl)
+- ✅ WiFi/MQTT
+
+**Documentation:**
+- 📥 [FIRMWARE_DOWNLOAD.md](FIRMWARE_DOWNLOAD.md) - Complete download guide
+- 🚀 [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) - Installation instructions
+- ⚙️ [SETUP_TASMOTA_77.md](SETUP_TASMOTA_77.md) - Configuration guide
+- 🎨 [DISPLAY_CONFIG.md](DISPLAY_CONFIG.md) - Display customization
+- 📊 [FIRMWARE_OPTIMIZATION.md](FIRMWARE_OPTIMIZATION.md) - Optimization details
+
+---
+
 #### What it is?
 
 TasmoCompiler is a simple web GUI which allows you to compile fantastic [Tasmota](https://github.com/arendst/Sonoff-Tasmota) firmware with your own settings:
