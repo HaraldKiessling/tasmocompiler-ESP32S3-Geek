@@ -1,23 +1,44 @@
 #!/bin/bash
 # Tasmota-77 Configuration Script
-# Device: ESP32-S3 with DS18B20 temperature sensors
+# Device: ESP32-S3 with DS18B20 temperature sensors and BME280
 # Generated: 2026-01-10
 # Source device: tasmota-77.samharald.eu (192.168.0.77)
+#
+# Usage:
+#   ./setup-tasmota-77.sh [DEVICE_IP] [WIFI_SSID] [WIFI_PASSWORD] [HOSTNAME] [MQTT_HOST]
+#
+# Examples:
+#   # Configure only network settings
+#   ./setup-tasmota-77.sh 192.168.0.100
+#
+#   # Configure WiFi
+#   ./setup-tasmota-77.sh 192.168.0.100 "MyWiFi" "MyPassword"
+#
+#   # Configure WiFi and hostname
+#   ./setup-tasmota-77.sh 192.168.0.100 "MyWiFi" "MyPassword" "tasmota-sensor-01"
+#
+#   # Full configuration with MQTT
+#   ./setup-tasmota-77.sh 192.168.0.100 "MyWiFi" "MyPassword" "tasmota-sensor-01" "192.168.0.50"
 
-# Configuration extracted from running device
-DEVICE_NAME="Tasmota-77"
-HOSTNAME="tasmota-C6D100-4352"
-TOPIC="tasmota_C6D100"
-MQTT_CLIENT="DVES_C6D100"
-WIFI_SSID="miVida2"
-WIFI_PASSWORD=""  # Set your WiFi password here
-
-# Device IP (if you want to configure via HTTP)
+# Parse command line parameters
 DEVICE_IP="${1:-192.168.0.77}"
+WIFI_SSID="${2:-}"
+WIFI_PASSWORD="${3:-}"
+HOSTNAME="${4:-}"
+MQTT_HOST="${5:-}"
+
+# Default configuration (from source device)
+DEFAULT_DEVICE_NAME="Tasmota-77"
+DEFAULT_HOSTNAME="tasmota-C6D100-4352"
+DEFAULT_TOPIC="tasmota_C6D100"
+DEFAULT_MQTT_CLIENT="DVES_C6D100"
+
 BASE_URL="http://${DEVICE_IP}"
 
-echo "Configuring Tasmota device at ${DEVICE_IP}..."
-echo "Device: ${DEVICE_NAME}"
+echo "=========================================="
+echo "Tasmota Configuration Script"
+echo "=========================================="
+echo "Device IP: ${DEVICE_IP}"
 echo ""
 
 # Function to send command to Tasmota
@@ -30,29 +51,45 @@ send_cmd() {
 
 # Basic device configuration
 echo "=== Basic Configuration ==="
-send_cmd "DeviceName%20${DEVICE_NAME}"
-send_cmd "FriendlyName%20${DEVICE_NAME}"
-send_cmd "Topic%20${TOPIC}"
-send_cmd "Hostname%20${HOSTNAME}"
+send_cmd "DeviceName%20${DEFAULT_DEVICE_NAME}"
+send_cmd "FriendlyName%20${DEFAULT_DEVICE_NAME}"
+send_cmd "Topic%20${DEFAULT_TOPIC}"
+
+if [ -n "$HOSTNAME" ]; then
+    echo "Setting custom hostname: ${HOSTNAME}"
+    send_cmd "Hostname%20${HOSTNAME}"
+else
+    echo "Using default hostname: ${DEFAULT_HOSTNAME}"
+    send_cmd "Hostname%20${DEFAULT_HOSTNAME}"
+fi
 
 # WiFi Configuration
 echo ""
 echo "=== WiFi Configuration ==="
-if [ -n "$WIFI_PASSWORD" ]; then
+if [ -n "$WIFI_SSID" ] && [ -n "$WIFI_PASSWORD" ]; then
+    echo "Configuring WiFi: ${WIFI_SSID}"
     send_cmd "SSId1%20${WIFI_SSID}"
     send_cmd "Password1%20${WIFI_PASSWORD}"
 else
-    echo "⚠️  WiFi password not set - skipping WiFi configuration"
-    echo "   Set WIFI_PASSWORD variable or configure manually"
+    echo "⚠️  WiFi not configured (no SSID/password provided)"
+    echo "   Current SSID: miVida2"
+    echo "   To configure: ./setup-tasmota-77.sh ${DEVICE_IP} \"YourSSID\" \"YourPassword\""
 fi
 
 # MQTT Configuration
 echo ""
 echo "=== MQTT Configuration ==="
-send_cmd "MqttClient%20${MQTT_CLIENT}"
+send_cmd "MqttClient%20${DEFAULT_MQTT_CLIENT}"
 send_cmd "MqttUser%20DVES_USER"
-# Note: MQTT host is not configured on source device
-echo "⚠️  MQTT host not configured - set with: MqttHost <your_mqtt_broker>"
+
+if [ -n "$MQTT_HOST" ]; then
+    echo "Configuring MQTT broker: ${MQTT_HOST}"
+    send_cmd "MqttHost%20${MQTT_HOST}"
+    send_cmd "MqttPort%201883"
+else
+    echo "⚠️  MQTT broker not configured"
+    echo "   To configure: ./setup-tasmota-77.sh ${DEVICE_IP} \"SSID\" \"Pass\" \"hostname\" \"mqtt.broker.ip\""
+fi
 
 # Power and LED settings
 echo ""
@@ -86,27 +123,45 @@ send_cmd "TimeDst%200,0,3,1,2,120"  # Daylight saving time (summer)
 # DS18B20 Temperature sensor settings
 echo ""
 echo "=== Sensor Configuration ==="
-echo "DS18B20 sensors detected:"
-echo "  - Sensor 1: ID 0000005329E2"
-echo "  - Sensor 2: ID 00000051C76D"
+echo "This device supports up to 10 DS18B20 temperature sensors."
+echo "Currently configured sensors (from source device):"
+echo "  - DS18B20-1: ID 0000005329E2 (21.9°C)"
+echo "  - DS18B20-2: ID 00000051C76D (22.1°C)"
+echo "  - DS18B20-3: (ready for additional sensor)"
+echo ""
+echo "Additional sensors:"
+echo "  - BME280: Temperature, Humidity, Pressure (I2C)"
+echo ""
 echo "Temperature unit: Celsius"
+echo ""
+echo "Note: Sensors are auto-detected. Connect DS18B20 sensors to GPIO pin"
+echo "      configured in template. The display (autoexec.be) supports up to"
+echo "      10 DS18B20 sensors and will show them automatically."
 
 # Final save and restart
 echo ""
 echo "=== Finalizing Configuration ==="
 send_cmd "SaveData%201"
 echo ""
+echo "=========================================="
 echo "✅ Configuration complete!"
+echo "=========================================="
 echo ""
 echo "Device information:"
-echo "  Name: ${DEVICE_NAME}"
-echo "  Hostname: ${HOSTNAME}"
-echo "  Topic: ${TOPIC}"
-echo "  WiFi SSID: ${WIFI_SSID}"
+echo "  Name: ${DEFAULT_DEVICE_NAME}"
+echo "  Hostname: ${HOSTNAME:-$DEFAULT_HOSTNAME}"
+echo "  Topic: ${DEFAULT_TOPIC}"
+echo "  WiFi SSID: ${WIFI_SSID:-miVida2 (unchanged)}"
+echo "  MQTT Host: ${MQTT_HOST:-not configured}"
 echo "  IP Address: ${DEVICE_IP}"
 echo ""
-echo "To restart the device, run:"
-echo "  curl -s '${BASE_URL}/cm?cmnd=Restart%201'"
+echo "Next steps:"
+echo "  1. Restart device: curl -s '${BASE_URL}/cm?cmnd=Restart%201'"
+echo "  2. Web interface: http://${DEVICE_IP}"
+echo "  3. Upload display files (autoexec.be, pages.jsonl) if needed"
 echo ""
-echo "To access the web interface:"
-echo "  http://${DEVICE_IP}"
+echo "Display configuration:"
+echo "  - autoexec.be: Main display logic with sensor dashboard"
+echo "  - pages.jsonl: Display layout definition"
+echo "  - Upload via: Consoles -> Manage File System"
+echo ""
