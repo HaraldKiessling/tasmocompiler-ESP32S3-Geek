@@ -142,6 +142,9 @@ Das Skript konfiguriert automatisch:
 ### Manuelle Konfiguration
 
 **1. WiFi konfigurieren**
+
+⚠️ **Wichtig**: Die Firmware enthält keine vorkonfigurierte WiFi-Verbindung. WiFi muss nach dem ersten Flash konfiguriert werden.
+
 ```bash
 curl -s "http://192.168.0.77/cm?cmnd=SSId1%20MeinWLAN"
 curl -s "http://192.168.0.77/cm?cmnd=Password1%20MeinPasswort"
@@ -364,7 +367,15 @@ curl -s "http://192.168.0.77/cm?cmnd=Restart%201"
 
 ### Problem: WiFi-Verbindung fehlgeschlagen
 
-**Lösung 1: AP-Modus**
+⚠️ **Hinweis**: Die Firmware enthält keine vorkonfigurierte WiFi-Verbindung. Nach dem ersten Flash startet das Gerät automatisch im AP-Modus.
+
+**Lösung 1: AP-Modus (Standard nach erstem Flash)**
+- Gerät startet automatisch als Access Point
+- Mit AP verbinden: `tasmota-XXXXXX` (Passwort: siehe Display oder Dokumentation)
+- Browser öffnen: `http://192.168.4.1`
+- WiFi manuell konfigurieren
+
+**Lösung 2: AP-Modus manuell aktivieren**
 - Boot-Button 6 Sekunden halten
 - Mit AP verbinden: `tasmota-XXXXXX`
 - Browser öffnen: `http://192.168.4.1`

@@ -100,7 +100,6 @@ if [ -n "$WIFI_SSID" ] && [ -n "$WIFI_PASSWORD" ]; then
     send_cmd "Password1%20${WIFI_PASSWORD}"
 else
     echo "⚠️  WiFi not configured (no SSID/password provided)"
-    echo "   Current SSID: miVida2"
     echo "   To configure: ./setup-tasmota-77.sh ${DEVICE_IP} \"YourSSID\" \"YourPassword\""
 fi
 
@@ -193,7 +192,7 @@ echo "Device information:"
 echo "  Name: ${DEFAULT_DEVICE_NAME}"
 echo "  Hostname: ${HOSTNAME:-$DEFAULT_HOSTNAME}"
 echo "  Topic: ${DEFAULT_TOPIC}"
-echo "  WiFi SSID: ${WIFI_SSID:-miVida2 (unchanged)}"
+echo "  WiFi SSID: ${WIFI_SSID:-not configured}"
 echo "  MQTT Host: ${MQTT_HOST:-not configured}"
 echo "  MQTT Password: ${MQTT_PASSWORD:+***set***}"
 echo "  IP Address: ${DEVICE_IP}"

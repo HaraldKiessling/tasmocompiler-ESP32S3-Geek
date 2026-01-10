@@ -223,8 +223,8 @@ Jede Zeile ist ein JSON-Objekt, das ein Display-Element definiert:
 
 | ID | Label | Beschreibung | Update |
 |----|-------|--------------|--------|
-| p1b12 | IP-Adresse | 192.168.0.77 | 60s |
-| p1b13 | WiFi SSID | miVida2 | 60s |
+| p1b12 | IP-Adresse | z.B. 192.168.0.77 | 60s |
+| p1b13 | WiFi SSID | Aktuelles WLAN | 60s |
 | p1b14 | Uhrzeit | 08:15:30 | 100ms |
 | p1b15 | Datum | 10.01.2026 | 100ms |
 

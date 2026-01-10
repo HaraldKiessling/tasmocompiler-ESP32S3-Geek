@@ -169,9 +169,9 @@ Das Gerät unterstützt bis zu **10 DS18B20 Sensoren** gleichzeitig:
 - Oder verteilt auf GPIO 6, 13, 14
 - Jeder Sensor hat eine eindeutige 64-Bit ID
 
-**Referenzgerät (tasmota-77) hat aktuell:**
-- DS18B20-1: ID `0000005329E2` (21.9°C)
-- DS18B20-2: ID `00000051C76D` (22.1°C)
+**Beispiel-Konfiguration:**
+- DS18B20-1: ID `0000005329E2`
+- DS18B20-2: ID `00000051C76D`
 - Platz für 8 weitere Sensoren
 
 ### BME280 Sensor
