@@ -5,7 +5,7 @@
 # Source device: tasmota-77.samharald.eu (192.168.0.77)
 #
 # Usage:
-#   ./setup-tasmota-77.sh [DEVICE_IP] [WIFI_SSID] [WIFI_PASSWORD] [HOSTNAME] [MQTT_HOST]
+#   ./setup-tasmota-77.sh [DEVICE_IP] [WIFI_SSID] [WIFI_PASSWORD] [HOSTNAME] [MQTT_HOST] [MQTT_PASSWORD]
 #
 # Examples:
 #   # Configure only network settings
@@ -19,6 +19,9 @@
 #
 #   # Full configuration with MQTT
 #   ./setup-tasmota-77.sh 192.168.0.100 "MyWiFi" "MyPassword" "tasmota-sensor-01" "192.168.0.50"
+#
+#   # MQTT with password
+#   ./setup-tasmota-77.sh 192.168.0.100 "MyWiFi" "MyPassword" "tasmota-sensor-01" "192.168.0.50" "mqtt_password"
 
 # Parse command line parameters
 DEVICE_IP="${1:-192.168.0.77}"
@@ -26,6 +29,7 @@ WIFI_SSID="${2:-}"
 WIFI_PASSWORD="${3:-}"
 HOSTNAME="${4:-}"
 MQTT_HOST="${5:-}"
+MQTT_PASSWORD="${6:-}"
 
 # Default configuration (from source device)
 DEFAULT_DEVICE_NAME="Tasmota-77"
@@ -86,9 +90,16 @@ if [ -n "$MQTT_HOST" ]; then
     echo "Configuring MQTT broker: ${MQTT_HOST}"
     send_cmd "MqttHost%20${MQTT_HOST}"
     send_cmd "MqttPort%201883"
+    
+    if [ -n "$MQTT_PASSWORD" ]; then
+        echo "Setting MQTT password"
+        send_cmd "MqttPassword%20${MQTT_PASSWORD}"
+    else
+        echo "⚠️  MQTT password not set"
+    fi
 else
     echo "⚠️  MQTT broker not configured"
-    echo "   To configure: ./setup-tasmota-77.sh ${DEVICE_IP} \"SSID\" \"Pass\" \"hostname\" \"mqtt.broker.ip\""
+    echo "   To configure: ./setup-tasmota-77.sh ${DEVICE_IP} \"SSID\" \"Pass\" \"hostname\" \"mqtt.broker.ip\" \"mqtt_password\""
 fi
 
 # Power and LED settings
@@ -153,6 +164,7 @@ echo "  Hostname: ${HOSTNAME:-$DEFAULT_HOSTNAME}"
 echo "  Topic: ${DEFAULT_TOPIC}"
 echo "  WiFi SSID: ${WIFI_SSID:-miVida2 (unchanged)}"
 echo "  MQTT Host: ${MQTT_HOST:-not configured}"
+echo "  MQTT Password: ${MQTT_PASSWORD:+***set***}"
 echo "  IP Address: ${DEVICE_IP}"
 echo ""
 echo "Next steps:"

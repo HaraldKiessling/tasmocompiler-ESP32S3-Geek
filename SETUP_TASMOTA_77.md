@@ -19,7 +19,7 @@ Das `setup-tasmota-77.sh` Skript konfiguriert ein Tasmota ESP32-S3 Gerät mit de
 ### Syntax
 
 ```bash
-./setup-tasmota-77.sh [DEVICE_IP] [WIFI_SSID] [WIFI_PASSWORD] [HOSTNAME] [MQTT_HOST]
+./setup-tasmota-77.sh [DEVICE_IP] [WIFI_SSID] [WIFI_PASSWORD] [HOSTNAME] [MQTT_HOST] [MQTT_PASSWORD]
 ```
 
 ### Parameter
@@ -31,6 +31,7 @@ Das `setup-tasmota-77.sh` Skript konfiguriert ein Tasmota ESP32-S3 Gerät mit de
 | `WIFI_PASSWORD` | 3 | WiFi-Passwort | Nein | - |
 | `HOSTNAME` | 4 | Gerät-Hostname | Nein | tasmota-C6D100-4352 |
 | `MQTT_HOST` | 5 | MQTT-Broker IP/Hostname | Nein | - |
+| `MQTT_PASSWORD` | 6 | MQTT-Broker Passwort | Nein | - |
 
 **Wichtig**: Wenn ein Parameter nicht übergeben wird, wird die entsprechende Einstellung **nicht geändert**. Das Gerät behält seine aktuelle Konfiguration.
 
@@ -54,17 +55,29 @@ Setzt WiFi-Zugangsdaten. Hostname und MQTT bleiben unverändert.
 ```
 Konfiguriert WiFi und setzt einen benutzerdefinierten Hostname.
 
-#### 4. Vollständige Konfiguration
+#### 4. Vollständige Konfiguration mit MQTT
 ```bash
 ./setup-tasmota-77.sh 192.168.0.100 "MeinWLAN" "MeinPasswort" "tasmota-wohnzimmer" "192.168.0.50"
 ```
-Konfiguriert alle Parameter inklusive MQTT-Broker.
+Konfiguriert alle Parameter inklusive MQTT-Broker (ohne Passwort).
 
-#### 5. Nur MQTT ändern (WiFi beibehalten)
+#### 5. MQTT mit Passwort
 ```bash
-./setup-tasmota-77.sh 192.168.0.100 "" "" "" "192.168.0.50"
+./setup-tasmota-77.sh 192.168.0.100 "MeinWLAN" "MeinPasswort" "tasmota-wohnzimmer" "192.168.0.50" "mqtt_secret"
+```
+Vollständige Konfiguration inklusive MQTT-Broker mit Authentifizierung.
+
+#### 6. Nur MQTT ändern (WiFi beibehalten)
+```bash
+./setup-tasmota-77.sh 192.168.0.100 "" "" "" "192.168.0.50" "mqtt_secret"
 ```
 Leere Strings für WiFi-Parameter bedeuten: keine Änderung. Nur MQTT wird gesetzt.
+
+#### 7. MQTT-Passwort ohne Host ändern
+```bash
+./setup-tasmota-77.sh 192.168.0.100 "" "" "" "" "neues_mqtt_passwort"
+```
+⚠️ **Hinweis**: MQTT-Passwort wird nur gesetzt, wenn auch MQTT_HOST angegeben ist.
 
 ## Konfigurierte Einstellungen
 
@@ -286,9 +299,31 @@ export TASMOTA_WIFI_SSID="MeinWLAN"
 export TASMOTA_WIFI_PASS="MeinPasswort"
 export TASMOTA_HOSTNAME="tasmota-sensor-01"
 export TASMOTA_MQTT="192.168.0.50"
+export TASMOTA_MQTT_PASS="mqtt_secret"
 
-./setup-tasmota-77.sh "$TASMOTA_IP" "$TASMOTA_WIFI_SSID" "$TASMOTA_WIFI_PASS" "$TASMOTA_HOSTNAME" "$TASMOTA_MQTT"
+./setup-tasmota-77.sh "$TASMOTA_IP" "$TASMOTA_WIFI_SSID" "$TASMOTA_WIFI_PASS" "$TASMOTA_HOSTNAME" "$TASMOTA_MQTT" "$TASMOTA_MQTT_PASS"
 ```
+
+### MQTT-Sicherheit
+
+**Wichtige Hinweise zur MQTT-Konfiguration:**
+
+1. **Passwort-Sicherheit**: Das MQTT-Passwort wird im Klartext übertragen. Verwenden Sie HTTPS oder ein sicheres Netzwerk.
+
+2. **Passwort im Gerät**: Das Passwort wird im Tasmota-Gerät gespeichert und kann über die Web-Oberfläche eingesehen werden.
+
+3. **Empfohlene Praxis**:
+   ```bash
+   # Passwort aus Datei lesen (nicht in Shell-History)
+   MQTT_PASS=$(cat /secure/mqtt_password.txt)
+   ./setup-tasmota-77.sh 192.168.0.100 "SSID" "Pass" "hostname" "mqtt.broker" "$MQTT_PASS"
+   ```
+
+4. **MQTT-Benutzer ändern**: Standardmäßig wird `DVES_USER` verwendet. Für mehr Sicherheit:
+   ```bash
+   # Im Skript oder manuell:
+   curl -s "http://192.168.0.100/cm?cmnd=MqttUser%20custom_user"
+   ```
 
 ## Fehlerbehebung
 
