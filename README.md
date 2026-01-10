@@ -44,6 +44,35 @@ curl -L -o tasmota32s3-matter-ha.bin \
 
 ---
 
+## 📋 Project Overview
+
+This repository contains a complete Tasmota firmware solution for the **ESP32-S3-Geek** development board with LVGL display, optimized for temperature monitoring with multiple DS18B20 sensors and BME280 environmental sensor.
+
+### Key Features
+- ✅ **Pre-compiled Firmware**: Ready-to-use LVGL v15.0.1 (2.1 MB)
+- ✅ **Optimized Configuration**: Reduced firmware size (100-700 KB savings)
+- ✅ **Automated Setup**: One-command configuration script
+- ✅ **Display Dashboard**: Berry-scripted sensor display with real-time updates
+- ✅ **Security**: No pre-configured WiFi credentials
+- ✅ **GPIO Template**: Pre-configured for ESP32-S3-Geek hardware
+- ✅ **Comprehensive Documentation**: 22+ documentation files
+
+### Hardware Support
+- **Board**: ESP32-S3-Geek (Waveshare)
+- **Display**: ST7789 TFT 320x240 with CST816S touch
+- **Sensors**: Up to 10x DS18B20 + BME280 (I2C)
+- **Flash**: 16 MB
+- **PSRAM**: 8 MB
+
+### Quick Links
+- 📥 [Download Firmware](FIRMWARE_DOWNLOAD.md)
+- 🚀 [Installation Guide](DEPLOYMENT_GUIDE.md)
+- ⚙️ [Setup Instructions](SETUP_TASMOTA_77.md)
+- 🎨 [Display Configuration](DISPLAY_CONFIG.md)
+- 📊 [Optimization Details](FIRMWARE_OPTIMIZATION.md)
+
+---
+
 #### What it is?
 
 TasmoCompiler is a simple web GUI which allows you to compile fantastic [Tasmota](https://github.com/arendst/Sonoff-Tasmota) firmware with your own settings:
