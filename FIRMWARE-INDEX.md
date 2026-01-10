@@ -33,14 +33,14 @@ Zentrale Übersicht aller verfügbaren Firmware-Versionen und Download-Links.
 
 | Methode | Link |
 |---------|------|
-| **GitHub Raw** | [tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin](https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin) |
+| **GitHub Raw** | [tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin](https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin) |
 | **Repository** | `firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin` |
-| **curl** | `curl -L -o firmware.bin "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"` |
-| **wget** | `wget https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin` |
+| **curl** | `curl -L -o firmware.bin "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"` |
+| **wget** | `wget https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin` |
 
 **OTA-Update:**
 ```
-Backlog OtaUrl https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin; Upgrade 1
+Backlog OtaUrl https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin; Upgrade 1
 ```
 
 **Test-Status:**
@@ -176,7 +176,7 @@ Get-FileHash -Algorithm MD5 tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bi
 
 ```bash
 curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin \
-  "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
 ```
 
 ### 2. MD5 verifizieren
@@ -184,7 +184,7 @@ curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin \
 ```bash
 # MD5-Datei herunterladen
 curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5 \
-  "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5"
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5"
 
 # Verifizieren
 md5sum -c tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5
@@ -195,13 +195,13 @@ md5sum -c tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5
 
 **Via Tasmota-Konsole:**
 ```
-Backlog OtaUrl https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin; Upgrade 1
+Backlog OtaUrl https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin; Upgrade 1
 ```
 
 **Via curl:**
 ```bash
 TASMOTA_IP="tasmota-XX.samharald.eu"
-curl -k -s "https://${TASMOTA_IP}/cm?cmnd=Backlog%20OtaUrl%20https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin;Upgrade%201"
+curl -k -s "https://${TASMOTA_IP}/cm?cmnd=Backlog%20OtaUrl%20https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin;Upgrade%201"
 ```
 
 ### 4. Verifikation

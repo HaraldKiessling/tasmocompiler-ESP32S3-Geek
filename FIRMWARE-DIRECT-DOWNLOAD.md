@@ -17,24 +17,24 @@
 
 **Direkter Firmware-Download:**
 ```
-https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
+https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
 ```
 
 **Download via curl:**
 ```bash
 curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin \
-  "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
 ```
 
 **Download via wget:**
 ```bash
-wget https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
+wget https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin
 ```
 
 **MD5-Datei herunterladen:**
 ```bash
 curl -L -o tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5 \
-  "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5"
+  "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin.md5"
 ```
 
 ### 2. Repository-Pfad
@@ -132,7 +132,7 @@ axel -n 4 https://8000--019b9edf-ce0e-7895-a426-a85956ad52b2.eu-central-1-01.git
 #!/usr/bin/env python3
 import requests
 
-url = "https://raw.githubusercontent.com/benzino77/tasmocompiler/main/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
+url = "https://raw.githubusercontent.com/HaraldKiessling/tasmocompiler-ESP32S3-Geek/tasmota-esp32s3-lvgl-v15.0.1/firmware-releases/tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
 filename = "tasmota32s3-v15.0.1-ESP32-S3-Geek-BME280-LittleFS.bin"
 
 print(f"Downloading {filename}...")
