@@ -53,7 +53,31 @@ send_cmd() {
     sleep 0.5
 }
 
+# Template and GPIO Configuration
+echo "=== Template and GPIO Configuration ==="
+echo "Configuring ESP32-S3-Geek template..."
+
+# Template configuration
+TEMPLATE='{"NAME":"ESP32S3-Geek","GPIO":[32,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,640,608,0,0,0,0,8896,8960,8800,8832,8864,8928,0,6210,0,0,3200,3232,0,0,0,0],"FLAG":0,"BASE":1}'
+send_cmd "Template%20${TEMPLATE}"
+send_cmd "Module%200"
+
+# Configure DS18x20 sensors on GPIO 6, 13, 14
+echo "Configuring DS18x20 sensors on GPIO 6, 13, 14..."
+send_cmd "GPIO6%201312"   # DS18x20
+send_cmd "GPIO13%201312"  # DS18x20
+send_cmd "GPIO14%201312"  # DS18x20
+
+echo "Template configured:"
+echo "  - GPIO0: Button"
+echo "  - GPIO6, 13, 14: DS18x20 (Temperature sensors)"
+echo "  - GPIO16: I2C SDA (BME280)"
+echo "  - GPIO17: I2C SCL (BME280)"
+echo "  - GPIO22-27: SDIO (Display)"
+echo "  - GPIO32-33: Serial"
+
 # Basic device configuration
+echo ""
 echo "=== Basic Configuration ==="
 send_cmd "DeviceName%20${DEFAULT_DEVICE_NAME}"
 send_cmd "FriendlyName%20${DEFAULT_DEVICE_NAME}"
@@ -131,23 +155,30 @@ send_cmd "Timezone%20%2B01:00"  # UTC+1
 send_cmd "TimeStd%200,0,10,1,3,60"  # Standard time (winter)
 send_cmd "TimeDst%200,0,3,1,2,120"  # Daylight saving time (summer)
 
-# DS18B20 Temperature sensor settings
+# Sensor information
 echo ""
-echo "=== Sensor Configuration ==="
-echo "This device supports up to 10 DS18B20 temperature sensors."
-echo "Currently configured sensors (from source device):"
-echo "  - DS18B20-1: ID 0000005329E2 (21.9°C)"
-echo "  - DS18B20-2: ID 00000051C76D (22.1°C)"
-echo "  - DS18B20-3: (ready for additional sensor)"
+echo "=== Sensor Configuration Summary ==="
+echo "DS18B20 Temperature Sensors:"
+echo "  - GPIO Pins: 6, 13, 14 (configured for DS18x20)"
+echo "  - Supports: Up to 10 sensors total"
+echo "  - Auto-detection: Yes"
+echo "  - Current sensors from source device:"
+echo "    * DS18B20-1: ID 0000005329E2"
+echo "    * DS18B20-2: ID 00000051C76D"
+echo "    * DS18B20-3: Ready for additional sensor"
 echo ""
-echo "Additional sensors:"
-echo "  - BME280: Temperature, Humidity, Pressure (I2C)"
+echo "BME280 Sensor (I2C):"
+echo "  - GPIO Pins: SDA=16, SCL=17"
+echo "  - Measures: Temperature, Humidity, Pressure"
+echo "  - Auto-detection: Yes"
 echo ""
-echo "Temperature unit: Celsius"
+echo "Display (LVGL):"
+echo "  - Interface: SDIO (GPIO 22-27)"
+echo "  - Configuration: autoexec.be + pages.jsonl"
+echo "  - Shows: All detected sensors automatically"
 echo ""
-echo "Note: Sensors are auto-detected. Connect DS18B20 sensors to GPIO pin"
-echo "      configured in template. The display (autoexec.be) supports up to"
-echo "      10 DS18B20 sensors and will show them automatically."
+echo "Note: After restart, check sensor detection with:"
+echo "      curl -s 'http://${DEVICE_IP}/cm?cmnd=Status%208'"
 
 # Final save and restart
 echo ""

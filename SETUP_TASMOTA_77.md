@@ -81,12 +81,48 @@ Leere Strings für WiFi-Parameter bedeuten: keine Änderung. Nur MQTT wird geset
 
 ## Konfigurierte Einstellungen
 
+### Template und GPIO
+
+Das Skript konfiguriert automatisch das ESP32-S3-Geek Template mit folgenden GPIO-Zuweisungen:
+
+**Template:**
+```json
+{
+  "NAME": "ESP32S3-Geek",
+  "GPIO": [32,0,0,0,0,0,1,0,0,0,0,0,0,1,1,0,640,608,0,0,0,0,8896,8960,8800,8832,8864,8928,0,6210,0,0,3200,3232,0,0,0,0],
+  "FLAG": 0,
+  "BASE": 1
+}
+```
+
+**GPIO-Belegung:**
+
+| GPIO | Funktion | Beschreibung |
+|------|----------|--------------|
+| 0 | Button | Taster für Steuerung |
+| 6 | DS18x20 | Temperatursensor 1-Wire Bus |
+| 13 | DS18x20 | Temperatursensor 1-Wire Bus |
+| 14 | DS18x20 | Temperatursensor 1-Wire Bus |
+| 16 | I2C SDA | I2C Datenleitung (BME280) |
+| 17 | I2C SCL | I2C Taktleitung (BME280) |
+| 22 | SDIO D1 | Display Datenleitung 1 |
+| 23 | SDIO D3 | Display Datenleitung 3 |
+| 24 | SDIO CMD | Display Kommando |
+| 25 | SDIO CLK | Display Takt |
+| 26 | SDIO D0 | Display Datenleitung 0 |
+| 27 | SDIO D2 | Display Datenleitung 2 |
+| 32 | Serial Tx | Serielle Übertragung |
+| 33 | Serial Rx | Serieller Empfang |
+
+**Wichtig:** Das Template wird automatisch beim ersten Ausführen des Skripts gesetzt. Nach dem Setzen des Templates erfolgt ein automatischer Neustart des Geräts.
+
 ### Basis-Konfiguration
 - **DeviceName**: Tasmota-77
 - **FriendlyName**: Tasmota-77
 - **Topic**: tasmota_C6D100
 - **MQTT Client**: DVES_C6D100
 - **MQTT User**: DVES_USER
+- **Module**: 0 (ESP32S3-Geek Template)
 
 ### Netzwerk-Einstellungen
 - **WifiConfig**: 4 (Retry other AP without restart)
@@ -116,11 +152,22 @@ Leere Strings für WiFi-Parameter bedeuten: keine Änderung. Nur MQTT wird geset
 
 Das Gerät unterstützt bis zu **10 DS18B20 Sensoren** gleichzeitig:
 
-- **Anschluss**: OneWire-Bus (GPIO konfiguriert im Template)
+- **GPIO-Pins**: 6, 13, 14 (konfiguriert als DS18x20)
+- **Anschluss**: OneWire-Bus (1-Wire Protokoll)
+- **Verkabelung**: 
+  - Sensor Pin 1 (GND) → GND
+  - Sensor Pin 2 (DQ) → GPIO 6, 13 oder 14
+  - Sensor Pin 3 (VDD) → 3.3V
+  - Pull-up Widerstand: 4.7kΩ zwischen DQ und VDD
 - **Erkennnung**: Automatisch beim Start
 - **Benennung**: DS18B20-1, DS18B20-2, ..., DS18B20-10
 - **Auflösung**: 0.1°C
 - **Einheit**: Celsius
+
+**Mehrere Sensoren:**
+- Alle Sensoren können parallel an einen GPIO-Pin angeschlossen werden (1-Wire Bus)
+- Oder verteilt auf GPIO 6, 13, 14
+- Jeder Sensor hat eine eindeutige 64-Bit ID
 
 **Referenzgerät (tasmota-77) hat aktuell:**
 - DS18B20-1: ID `0000005329E2` (21.9°C)
@@ -129,12 +176,19 @@ Das Gerät unterstützt bis zu **10 DS18B20 Sensoren** gleichzeitig:
 
 ### BME280 Sensor
 
-- **Anschluss**: I2C-Bus
+- **GPIO-Pins**: SDA=16, SCL=17 (I2C-Bus)
+- **Verkabelung**:
+  - BME280 VCC → 3.3V
+  - BME280 GND → GND
+  - BME280 SDA → GPIO 16
+  - BME280 SCL → GPIO 17
+- **I2C-Adresse**: 0x76 oder 0x77 (automatisch erkannt)
 - **Messwerte**:
-  - Temperatur (-40°C bis +85°C)
-  - Luftfeuchtigkeit (0-100%)
-  - Luftdruck (300-1100 hPa)
-- **Erkennnung**: Automatisch
+  - Temperatur (-40°C bis +85°C, ±1°C Genauigkeit)
+  - Luftfeuchtigkeit (0-100%, ±3% Genauigkeit)
+  - Luftdruck (300-1100 hPa, ±1 hPa Genauigkeit)
+- **Erkennnung**: Automatisch beim Start
+- **Update-Rate**: Konfigurierbar (Standard: alle 10 Sekunden)
 
 ## Display-Konfiguration
 
@@ -254,20 +308,41 @@ In `pages.jsonl` können Position, Größe und Stil der Labels angepasst werden:
 
 Das Skript kann erweitert werden für zusätzliche Parameter:
 
-#### Template konfigurieren
+#### Template anpassen
+
+Das Skript setzt bereits das ESP32-S3-Geek Template. Für Anpassungen:
 
 ```bash
-# Im Skript hinzufügen:
-TEMPLATE='{"NAME":"ESP32-S3-Geek","GPIO":[...],"FLAG":0,"BASE":1}'
-send_cmd "Template%20${TEMPLATE}"
-send_cmd "Module%200"
+# Aktuelles Template anzeigen
+curl -s "http://192.168.0.100/cm?cmnd=Template"
+
+# Template ändern (Beispiel: GPIO4 hinzufügen)
+TEMPLATE='{"NAME":"Custom","GPIO":[32,0,0,0,1312,0,1,0,0,0,0,0,0,1,1,0,640,608,0,0,0,0,8896,8960,8800,8832,8864,8928,0,6210,0,0,3200,3232,0,0,0,0],"FLAG":0,"BASE":1}'
+curl -s "http://192.168.0.100/cm?cmnd=Template%20${TEMPLATE}"
+curl -s "http://192.168.0.100/cm?cmnd=Module%200"
 ```
 
-#### GPIO-Pins setzen
+#### GPIO-Pins manuell setzen
 
 ```bash
-# Beispiel: GPIO4 als DS18x20
-send_cmd "GPIO4%204"  # 4 = DS18x20
+# GPIO-Funktionen (wichtigste Werte):
+# 0 = None, 1 = User, 32 = Button, 224 = Relay, 288 = Led
+# 608 = I2C SCL, 640 = I2C SDA, 1312 = DS18x20
+# 3200 = Serial Tx, 3232 = Serial Rx
+
+# Beispiel: GPIO4 als DS18x20 setzen
+curl -s "http://192.168.0.100/cm?cmnd=GPIO4%201312"
+
+# Beispiel: GPIO5 als Relay setzen
+curl -s "http://192.168.0.100/cm?cmnd=GPIO5%20224"
+
+# Alle GPIO-Funktionen anzeigen
+curl -s "http://192.168.0.100/cm?cmnd=Gpios"
+```
+
+**Wichtig:** Nach GPIO-Änderungen ist ein Neustart erforderlich:
+```bash
+curl -s "http://192.168.0.100/cm?cmnd=Restart%201"
 ```
 
 #### SetOptions
@@ -355,7 +430,22 @@ curl -s "http://192.168.0.77/cm?cmnd=GPIO"
 
 # Template prüfen
 curl -s "http://192.168.0.77/cm?cmnd=Template"
+
+# Module prüfen
+curl -s "http://192.168.0.77/cm?cmnd=Module"
 ```
+
+**DS18B20 Probleme:**
+1. Verkabelung prüfen (GND, DQ, VDD)
+2. Pull-up Widerstand 4.7kΩ zwischen DQ und VDD
+3. GPIO-Pin korrekt konfiguriert (1312 = DS18x20)
+4. Sensor-IDs auslesen: `curl -s "http://192.168.0.77/cm?cmnd=DS18Alias"`
+
+**BME280 Probleme:**
+1. I2C-Verkabelung prüfen (SDA=GPIO16, SCL=GPIO17)
+2. I2C-Adresse prüfen: `curl -s "http://192.168.0.77/cm?cmnd=I2CScan"`
+3. Sensor-Power-Cycle (Stromversorgung kurz trennen)
+4. I2C-Geschwindigkeit reduzieren: `curl -s "http://192.168.0.77/cm?cmnd=I2CDriver10%201"`
 
 ### Display zeigt keine Daten
 
